@@ -13,6 +13,7 @@ import { useProjectRecovery } from "./hooks/useProjectRecovery";
 import { useKieAIPoller } from "./hooks/useKieAIPoller";
 import { installWebMcpSurface } from "./services/agent/webmcp-install";
 import { WebMcpConfirmPrompt } from "./components/webmcp/WebMcpConfirmPrompt";
+import { WebMcpActivityRail } from "./components/webmcp/WebMcpActivityRail";
 import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { ToolcraftText as Text } from "@openreel/ui";
 
@@ -167,6 +168,7 @@ function App() {
           <EditorInterface />
         </Suspense>
       )}
+      <WebMcpActivityRail />
       <WebMcpConfirmPrompt />
       <ToastContainer />
       <ScriptViewDialog
