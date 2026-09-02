@@ -10,6 +10,16 @@ OpenReel Video is a fully-featured browser-based video editor that runs entirely
 
 ---
 
+## WebMCP Challenge submission
+
+This editor is now operable by AI agents through [WebMCP](https://webmachinelearning.github.io/webmcp/), with a tool surface derived from the timeline itself — 22 tools on an empty editor, 62 once a project has audio, retracting again as state goes away.
+
+Built on OpenReel, my existing MIT-licensed browser video editor stack; the WebMCP agent surface in this submission is new work.
+
+**[Live demo](https://openreel-webmcp.pages.dev)** | **[How it works →](WEBMCP.md)**
+
+---
+
 ## Why OpenReel?
 
 - **100% Client-Side** - Your videos never leave your device. No uploads, no cloud processing, complete privacy.
