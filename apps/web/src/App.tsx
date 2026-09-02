@@ -11,6 +11,8 @@ import { useProjectStore } from "./stores/project-store";
 import { useRouter } from "./hooks/use-router";
 import { useProjectRecovery } from "./hooks/useProjectRecovery";
 import { useKieAIPoller } from "./hooks/useKieAIPoller";
+import { installWebMcpSurface } from "./services/agent/webmcp-install";
+import { WebMcpConfirmPrompt } from "./components/webmcp/WebMcpConfirmPrompt";
 import { SOCIAL_MEDIA_PRESETS, type SocialMediaCategory } from "@openreel/core";
 import { ToolcraftText as Text } from "@openreel/ui";
 
@@ -54,6 +56,11 @@ function App() {
   const isMotionSurface = isMotionHost || route === "motion";
 
   useKieAIPoller();
+
+  // Expose the editor's tool layer to any agent on this page via WebMCP, so an
+  // agent drives the open project through the same registry and undo history as
+  // the chat panel. No-op on browsers without WebMCP support.
+  useEffect(() => installWebMcpSurface(), []);
 
   useEffect(() => {
     if (hasHandledInitialRoute.current) return;
@@ -160,6 +167,7 @@ function App() {
           <EditorInterface />
         </Suspense>
       )}
+      <WebMcpConfirmPrompt />
       <ToastContainer />
       <ScriptViewDialog
         isOpen={activeModal === "scriptView"}

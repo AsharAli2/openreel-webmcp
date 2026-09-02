@@ -166,6 +166,75 @@ function followMcpMotionResult(
   }
 }
 
+/** Routes that render the welcome screen rather than the editor. */
+const WELCOME_ROUTES = new Set(["", "welcome", "templates", "recent"]);
+
+/** Tools that make a project current and therefore should put it on screen. */
+const PROJECT_OPENING_TOOLS = new Set(["create_project", "open_project"]);
+
+function currentRoute(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.hash.replace(/^#\/?/, "").split("?")[0];
+}
+
+/**
+ * Follows the UI to a project an agent just opened or created.
+ *
+ * Without this the store updates behind the welcome screen: the tool reports
+ * success and the human sees nothing change. Only fires from a welcome route so
+ * an agent call can never yank someone out of the editor or Motion Creator.
+ */
+function followProjectResult(name: string, result: ToolResult): void {
+  if (!result.ok || !PROJECT_OPENING_TOOLS.has(name)) return;
+  useUIStore.getState().setDesktopPage("edit");
+  if (typeof window !== "undefined" && WELCOME_ROUTES.has(currentRoute())) {
+    window.location.hash = "#/editor";
+  }
+}
+
+export interface CallToolOptions {
+  /**
+   * When false, destructive/expensive tools are refused with
+   * CONFIRMATION_REQUIRED instead of running. The desktop bridge drives this
+   * from the trusted-local setting; the WebMCP page surface leaves it true and
+   * lets the browser's own human-in-the-loop gate do the confirming.
+   */
+  readonly allowSensitive: boolean;
+  /** Message surfaced when a sensitive tool is refused. */
+  readonly confirmationHint?: string;
+}
+
+/**
+ * Shared core for every external tool transport (the desktop MCP bridge and the
+ * in-page WebMCP surface). Applies the sensitive-tool policy, runs the call
+ * serialized against the shared LiveEditorHost so agent and human edits share
+ * one undo history, then follows the UI to whatever changed.
+ */
+export async function callToolForBridge(
+  name: string,
+  args: Record<string, unknown> = {},
+  options: CallToolOptions,
+): Promise<ToolResult> {
+  if (!options.allowSensitive && (isDestructive(name) || isExpensive(name))) {
+    return {
+      ok: false,
+      summary: "Confirmation required",
+      error: {
+        code: "CONFIRMATION_REQUIRED",
+        message:
+          options.confirmationHint ??
+          `'${name}' is destructive or expensive and was not confirmed.`,
+      },
+    };
+  }
+  const result = await runExclusive(() =>
+    Promise.resolve(executeTool(name, args, getLiveEditorHost())),
+  );
+  followMcpMotionResult(name, args, result);
+  followProjectResult(name, result);
+  return result;
+}
+
 /**
  * Runs a main-process MCP request against the live editor. listTools returns the
  * registry; callTool gates destructive/expensive tools behind the trusted-local
@@ -182,24 +251,10 @@ export async function handleMcpBridgeRequest(
       const name = req.name;
       if (!name) return { ok: false, error: "Missing tool name" };
 
-      const autoAllow = useSettingsStore.getState().mcpAutoAllowTrustedLocal;
-      if (!autoAllow && (isDestructive(name) || isExpensive(name))) {
-        const blocked: ToolResult = {
-          ok: false,
-          summary: "Confirmation required",
-          error: {
-            code: "CONFIRMATION_REQUIRED",
-            message: `'${name}' is destructive or expensive. Enable "Trusted local — auto-allow" in Settings → MCP to permit it.`,
-          },
-        };
-        return { ok: true, result: blocked };
-      }
-
-      const args = req.args ?? {};
-      const result = await runExclusive(() =>
-        Promise.resolve(executeTool(name, args, getLiveEditorHost())),
-      );
-      followMcpMotionResult(name, args, result);
+      const result = await callToolForBridge(name, req.args ?? {}, {
+        allowSensitive: useSettingsStore.getState().mcpAutoAllowTrustedLocal,
+        confirmationHint: `'${name}' is destructive or expensive. Enable "Trusted local — auto-allow" in Settings → MCP to permit it.`,
+      });
       return { ok: true, result };
     }
     return { ok: false, error: `Unknown MCP bridge kind: ${req.kind}` };

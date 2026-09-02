@@ -29,6 +29,12 @@ const ALWAYS_AVAILABLE = new Set([
   "batch_actions",
 ]);
 
+/**
+ * Canonical always-available core. Exported so the in-page WebMCP surface and
+ * the prompt-based router expose the same baseline instead of drifting apart.
+ */
+export const CORE_TOOL_NAMES: ReadonlySet<string> = ALWAYS_AVAILABLE;
+
 const MOTION_TERMS = /\b(motion|composition|layer|keyframe|animate|animation|after effects|lower third|title card|kinetic|lottie|svg|figma|particle|shader|mask|matte|precomp|camera|render frame)\b/i;
 const CREATION_TERMS = /\b(3d|three[- ]?d|product|character|scene|model|gltf|glb|rig|mesh|material|texture|bevel|displacement|x[- ]?ray|cloth|camera module|exploded|cinematic|decal|cutaway)\b/i;
 

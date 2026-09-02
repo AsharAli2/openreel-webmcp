@@ -68,6 +68,46 @@ describe("handleMcpBridgeRequest", () => {
     h.setDesktopPage.mockClear();
   });
 
+  it("puts an agent-created project on screen from the welcome route", async () => {
+    window.location.hash = "#/welcome";
+    h.getTool.mockReturnValue({ domain: "project" });
+    h.executeTool.mockResolvedValue({ ok: true, summary: "Created" });
+    await handleMcpBridgeRequest({
+      callId: "c1",
+      kind: "callTool",
+      name: "create_project",
+      args: { name: "P" },
+    });
+    expect(window.location.hash).toBe("#/editor");
+    expect(h.setDesktopPage).toHaveBeenCalledWith("edit");
+  });
+
+  it("does not navigate away from the editor when a project is reopened", async () => {
+    window.location.hash = "#/motion";
+    h.getTool.mockReturnValue({ domain: "project" });
+    h.executeTool.mockResolvedValue({ ok: true, summary: "Opened" });
+    await handleMcpBridgeRequest({
+      callId: "c1",
+      kind: "callTool",
+      name: "open_project",
+      args: { projectId: "p1" },
+    });
+    expect(window.location.hash).toBe("#/motion");
+  });
+
+  it("leaves the route alone when the project tool fails", async () => {
+    window.location.hash = "#/welcome";
+    h.getTool.mockReturnValue({ domain: "project" });
+    h.executeTool.mockResolvedValue({ ok: false, summary: "nope" });
+    await handleMcpBridgeRequest({
+      callId: "c1",
+      kind: "callTool",
+      name: "create_project",
+      args: {},
+    });
+    expect(window.location.hash).toBe("#/welcome");
+  });
+
   it("returns the registry for listTools", async () => {
     const res = await handleMcpBridgeRequest({ callId: "c1", kind: "listTools" });
     expect(res.ok).toBe(true);
