@@ -1,0 +1,97 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.cache/
+.temp/
+.docs/
+docs/*
+!docs/superpowers/
+!docs/android-port/
+.worktrees/
+# Project-specific
+/public/projects/
+*.openreel
+!apps/desktop/crates/openreel-project/tests/fixtures/*.openreel
+apps/cloud/node_modules/
+apps/cloud/dist/
+apps/cloud/.wrangler/
+apps/ios
+apps/android
+
+# Desktop bundled ffmpeg binaries (large; fetched/built per-platform, documented in MANIFEST.json)
+apps/desktop/resources/bin/**/ffmpeg
+apps/desktop/resources/bin/**/ffmpeg.exe
+
+# Desktop bundled Blender sidecars (large; fetched/built per-platform, documented in apps/desktop/RIGGING.md)
+apps/desktop/resources/rigging/blender/
+
+# Desktop electron-builder output
+apps/desktop/release/
+
+# Desktop electron-builder config lives under build/ which the global build/ rule ignores
+!apps/desktop/build/
+!apps/desktop/build/**
+
+
+
+# Local files
+FEATURES_TWITTER.md
+.claude-tasks.md
+CLAUDE.md
+*-PLAN.md
+*-PLAN-*.md
+.playwright-mcp/
+.wrangler/
+
+
+mobile-mockup/
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+
+!docs/superpowers/
+
+# Brainstorming session artifacts
+.superpowers/
+
+# Signing certs — never commit
+*.p12
+*.pfx

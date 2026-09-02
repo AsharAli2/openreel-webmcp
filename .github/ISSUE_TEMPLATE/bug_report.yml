@@ -1,0 +1,109 @@
+name: Bug Report
+description: Report a bug or issue with OpenReel
+title: "[Bug]: "
+labels: ["needs-claude-review", "type-bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! This issue will be reviewed by Claude AI within 24 hours.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: When I click the export button, nothing happens...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the issue
+      placeholder: |
+        1. Open the editor
+        2. Import a video file
+        3. Click 'Export'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: The export dialog should open...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: Nothing happens, console shows error...
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser are you using?
+      placeholder: "Chrome 120"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What OS are you on?
+      placeholder: "macOS 14.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console Errors
+      description: Any errors in the browser console? (Press F12 to open DevTools)
+      placeholder: |
+        TypeError: Cannot read property 'export' of undefined
+        at exportVideo (export-engine.ts:45)
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots/Videos
+      description: Add screenshots or screen recordings if applicable
+      placeholder: Drag and drop images/videos here
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Critical (Blocks all functionality)
+        - High (Major feature broken)
+        - Medium (Minor feature broken)
+        - Low (Cosmetic or minor inconvenience)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this isn't a duplicate
+          required: true
+        - label: I have checked the browser console for errors
+          required: true
+        - label: I am using a supported browser (Chrome 94+ or Edge 94+)
+          required: true
