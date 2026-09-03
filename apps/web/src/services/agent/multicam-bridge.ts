@@ -28,7 +28,12 @@ async function artifact(groupId?: string) {
   const project = useProjectStore.getState().project;
   const group = selectGroup(groupId);
   const value = await loadMulticamArtifact(project.id, group.id);
-  if (!value) throw new Error(`Reusable activity artifact is unavailable for ${group.name}`);
+  if (!value) throw new Error(
+    `Multicam analysis has not been run in this browser session for "${group.name}". ` +
+    `The .orma artifact is stored in the browser's local IndexedDB and is not shared across ` +
+    `browser profiles or in-app browsers. Open the editor in the browser where analysis was ` +
+    `performed and retry from there.`
+  );
   return { project, group, artifact: value };
 }
 

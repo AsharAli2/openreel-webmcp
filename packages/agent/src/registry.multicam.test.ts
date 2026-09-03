@@ -71,6 +71,21 @@ describe("multicam agent and MCP tools", () => {
     expect(multicam.getManifest).toHaveBeenCalledWith("g1");
   });
 
+  it("accepts get_transcript and get_activity_map with no range args", async () => {
+    const multicam = bridge();
+    multicam.getTranscript = vi.fn(async () => ({ groupId: "g1", transcripts: {} }));
+    multicam.getActivityMap = vi.fn(async () => ({ groupId: "g1", activity: { windowMs: 100, points: [] }, sampled: false }));
+    const host = { multicam } as unknown as EditingHost;
+
+    const transcript = await executeTool("get_transcript", { groupId: "g1" }, host);
+    const activityMap = await executeTool("get_activity_map", { groupId: "g1" }, host);
+
+    expect(transcript.ok).toBe(true);
+    expect(multicam.getTranscript).toHaveBeenCalledWith("g1", expect.any(Object));
+    expect(activityMap.ok).toBe(true);
+    expect(multicam.getActivityMap).toHaveBeenCalledWith("g1", expect.any(Object));
+  });
+
   it("enforces policy and cut bounds before invoking the host", async () => {
     const multicam = bridge();
     const host = { multicam } as unknown as EditingHost;
