@@ -52,6 +52,7 @@ export function readEditorSurfaceState(): EditorSurfaceState {
     ),
     hasShapeSelection: selectedItems.some((item) => item.type === "shape-clip"),
     hasMotionComposition: (project.motionCompositions ?? []).length > 0,
+    hasMulticamGroups: (project.multicamGroups ?? []).length > 0,
   };
 }
 

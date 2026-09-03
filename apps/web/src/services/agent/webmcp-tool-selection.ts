@@ -33,6 +33,7 @@ export interface EditorSurfaceState {
   readonly hasTextSelection: boolean;
   readonly hasShapeSelection: boolean;
   readonly hasMotionComposition: boolean;
+  readonly hasMulticamGroups: boolean;
 }
 
 export const EMPTY_SURFACE_STATE: EditorSurfaceState = {
@@ -47,6 +48,7 @@ export const EMPTY_SURFACE_STATE: EditorSurfaceState = {
   hasTextSelection: false,
   hasShapeSelection: false,
   hasMotionComposition: false,
+  hasMulticamGroups: false,
 };
 
 /**
@@ -140,9 +142,9 @@ const RULES: readonly Rule[] = [
     when: (s) => s.clipCount > 0,
   },
   {
-    label: "the project has multiple video tracks",
+    label: "the project has a multicam group",
     domains: ["multicam"],
-    when: (s) => s.videoTrackCount > 1,
+    when: (s) => s.hasMulticamGroups,
   },
   {
     label: "a motion composition exists",
