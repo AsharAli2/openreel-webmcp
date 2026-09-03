@@ -8,12 +8,14 @@ import {
   type WhisperModelKey,
 } from "./whisper-models";
 
-const MODEL_HOST = "https://media.openreel.video/models/";
-
+// Upstream OpenReel served Whisper weights from its own mirror
+// (media.openreel.video/models). That host returns 503 for this fork, so model
+// downloads fail with "Service unavailable". Fall back to the transformers.js
+// default host — huggingface.co — where the onnx-community/whisper-* models
+// live and are served with transformers.js-compatible CORS. Cached in the
+// browser after the first download, so this is a one-time fetch per model.
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
-env.remoteHost = MODEL_HOST;
-env.remotePathTemplate = "{model}/resolve/{revision}/";
 env.useBrowserCache = true;
 
 interface WhisperOutput {
