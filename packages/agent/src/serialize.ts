@@ -63,6 +63,15 @@ export interface ClipView {
   readonly hasColorGrading: boolean;
 }
 
+export interface SubtitleView {
+  readonly id: string;
+  readonly text: string;
+  readonly startSec: number;
+  readonly endSec: number;
+  readonly position?: "top" | "center" | "bottom";
+  readonly color?: string;
+}
+
 export interface ClipFilter {
   readonly trackIndex?: number;
   readonly fromSec?: number;
@@ -193,6 +202,45 @@ export function listClips(project: Project, filter: ClipFilter = {}): ClipView[]
     const start = Math.max(0, filter.offset ?? 0);
     const end = filter.limit !== undefined ? start + Math.max(0, filter.limit) : undefined;
     return result.slice(start, end);
+  }
+  return result;
+}
+
+interface RawSubtitle {
+  id: string;
+  text: string;
+  startTime: number;
+  endTime: number;
+  style?: { position?: "top" | "center" | "bottom"; color?: string };
+}
+
+/**
+ * Subtitles/captions live in `timeline.subtitles`, a separate array from the
+ * track clips — none of the other read tools surface them. Exposed so an agent
+ * can read captions produced by the Auto Caption panel (e.g. to restyle them as
+ * text overlays via `create_text_clip`). Optional range filter matches
+ * `listClips`; overlap semantics, not containment.
+ */
+export function listSubtitles(
+  project: Project,
+  filter: { fromSec?: number; toSec?: number } = {},
+): SubtitleView[] {
+  const subtitles =
+    ((project.timeline as { subtitles?: RawSubtitle[] }).subtitles) ?? [];
+  const result: SubtitleView[] = [];
+  for (const subtitle of subtitles) {
+    const startSec = subtitle.startTime;
+    const endSec = subtitle.endTime;
+    if (filter.fromSec !== undefined && endSec < filter.fromSec) continue;
+    if (filter.toSec !== undefined && startSec > filter.toSec) continue;
+    result.push({
+      id: subtitle.id,
+      text: subtitle.text,
+      startSec,
+      endSec,
+      position: subtitle.style?.position,
+      color: subtitle.style?.color,
+    });
   }
   return result;
 }

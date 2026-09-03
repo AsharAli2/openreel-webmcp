@@ -10,6 +10,7 @@ const ALWAYS_AVAILABLE = new Set([
   "list_tracks",
   "list_clips",
   "get_clip",
+  "list_subtitles",
   "get_capabilities",
   "create_project",
   "list_projects",

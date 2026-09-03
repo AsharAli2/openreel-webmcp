@@ -325,6 +325,7 @@ import {
   listMedia,
   listTracks,
   listClips,
+  listSubtitles,
   getClipDetail,
   type ClipFilter,
 } from "./serialize";
@@ -10681,6 +10682,17 @@ const TOOLS: RegisteredTool[] = [
   ),
   readTool("get_clip", "Get clip", "Full detail for one clip by id.", obj({ clipId: str }, ["clipId"]), (a, h) =>
     getClipDetail(h.getProject(), a.clipId as string),
+  ),
+  readTool(
+    "list_subtitles",
+    "List subtitles",
+    "Subtitle/caption cues on the timeline (text + seconds, plus position/color). Includes captions made by the Auto Caption panel. Optional range filter: fromSec, toSec.",
+    obj({ fromSec: num, toSec: num }),
+    (a, h) =>
+      listSubtitles(h.getProject(), {
+        fromSec: typeof a.fromSec === "number" ? a.fromSec : undefined,
+        toSec: typeof a.toSec === "number" ? a.toSec : undefined,
+      }),
   ),
   readTool("get_capabilities", "Capabilities", "Valid enums + parameter ranges.", obj({}), (_a, h) =>
     h.capabilities(),
