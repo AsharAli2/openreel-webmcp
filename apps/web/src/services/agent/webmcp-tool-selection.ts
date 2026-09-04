@@ -69,11 +69,14 @@ interface Rule {
 
 /**
  * `motion` is 190 of the 311 tools — real motion graphics, the 3D "creation"
- * engine, and the text animators all share one domain. Domain alone cannot
- * separate them, so these patterns subdivide the bucket.
+ * engine, and the text animators all share one domain. On the live WebMCP
+ * surface we keep ONLY the text animators from that bucket: the full Motion
+ * Creator / 3D engine would flood past the cap and bury the editing tools an
+ * agent actually reaches for (trim, overlays, effects, captions). The compositor
+ * stays reachable through the prompt-based router (`selectToolsForPrompt`); it is
+ * only kept off the always-on page surface.
  */
 const MOTION_TEXT_ANIMATORS = /text_(animator|shader)/;
-const MOTION_CREATION = /creation|scene3d|_3d_|gltf|rig_/;
 
 /**
  * Priority order. Earlier rules win a slot when the cap bites, so the tools
@@ -141,17 +144,6 @@ const RULES: readonly Rule[] = [
     domains: ["export"],
     when: (s) => s.clipCount > 0,
   },
-  {
-    label: "the project has a multicam group",
-    domains: ["multicam"],
-    when: (s) => s.hasMulticamGroups,
-  },
-  {
-    label: "a motion composition exists",
-    domains: ["motion"],
-    when: (s) => s.hasMotionComposition,
-    exclude: MOTION_CREATION,
-  },
 ];
 
 export interface SelectionResult {
@@ -179,7 +171,15 @@ export function selectToolsForState(
   const reasons: Record<string, string> = {};
   const activeRules: string[] = [];
 
+  // The Motion Creator / 3D engine (the bulk of the `motion` domain) is kept off
+  // the live surface entirely — only its text animators earn a slot, and only
+  // via the "a text clip is selected" rule below. Everything else an agent needs
+  // (trim, overlays, effects, captions, export) lives in the other domains.
+  const isHeavyMotion = (name: string, domain: ToolDomain): boolean =>
+    domain === "motion" && !MOTION_TEXT_ANIMATORS.test(name);
+
   for (const tool of tools) {
+    if (isHeavyMotion(tool.name, tool.domain)) continue;
     if (CORE_TOOL_NAMES.has(tool.name)) priority.set(tool.name, CORE_PRIORITY);
   }
 

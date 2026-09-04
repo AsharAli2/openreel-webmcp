@@ -123,7 +123,9 @@ describe("selectToolsForState", () => {
     }
   });
 
-  it("never exceeds the cap and always keeps the core", () => {
+  it("stays under the cap without truncating and keeps the core", () => {
+    // With the Motion Creator / 3D engine held off the live surface, even the
+    // busiest editing project fits comfortably: nothing is dropped.
     const busy = selectToolsForState(
       state({
         hasProject: true,
@@ -139,11 +141,32 @@ describe("selectToolsForState", () => {
       }),
     );
     expect(busy.names.length).toBeLessThanOrEqual(MAX_EXPOSED_TOOLS);
-    expect(busy.truncated).toBe(true);
+    expect(busy.truncated).toBe(false);
     const exposed = new Set(busy.names);
     for (const core of CORE_TOOL_NAMES) {
-      if (getTool(core)) expect(exposed.has(core)).toBe(true);
+      const def = getTool(core);
+      if (!def) continue;
+      // The Motion Creator core (compositor + 3D) is deliberately held off the
+      // live surface even though it is in the shared core set.
+      if (def.domain === "motion" && !/text_(animator|shader)/.test(core)) continue;
+      expect(exposed.has(core)).toBe(true);
     }
+  });
+
+  it("holds the Motion Creator / 3D engine off the surface, keeping text animators", () => {
+    const busy = selectToolsForState(
+      state({
+        hasProject: true,
+        clipCount: 5,
+        hasMotionComposition: true,
+        hasTextSelection: true,
+        selectedClipCount: 1,
+      }),
+    );
+    // The only `motion`-domain tools that survive are the text animators.
+    const motion = busy.names.filter((n) => getTool(n)?.domain === "motion");
+    expect(motion.length).toBeGreaterThan(0);
+    for (const n of motion) expect(n).toMatch(/text_(animator|shader)/);
   });
 
   it("explains every non-core tool it exposes", () => {
